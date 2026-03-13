@@ -1,171 +1,246 @@
-# ================================
-# INSTALADOR DE APPS - COLEGIO CRUZEIRO
-# ================================
+# ======================================================
+# INSTALADOR CORPORATIVO - COLEGIO CRUZEIRO
+# ======================================================
 
-# Fundo preto e texto branco
 $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.UI.RawUI.ForegroundColor = "White"
 Clear-Host
 
-# Função para centralizar texto
+# -------- FUNÇÕES VISUAIS --------
+
 function Write-Centered {
-    param(
-        [string]$Text,
-        [string]$Color = "White"
-    )
+    param($text,$color="White")
 
     $width = $Host.UI.RawUI.WindowSize.Width
-    $padding = [math]::Max(0, ($width - $Text.Length) / 2)
-    Write-Host (" " * [int]$padding + $Text) -ForegroundColor $Color
+    $padding = [math]::Max(0,($width-$text.Length)/2)
+    Write-Host (" " * [int]$padding + $text) -ForegroundColor $color
 }
 
-# Linha separadora
 function Linha {
-    Write-Centered "============================================" Yellow
+    Write-Centered "===================================================" Yellow
 }
 
-# ================================
-# MENU NAVEGADORES
-# ================================
+# -------- LOGO --------
+
+function Logo {
+
+Write-Centered "  ____                 _ _           " Cyan
+Write-Centered " / ___| ___   ___   __| (_) ___      " Cyan
+Write-Centered "| |    / _ \ / _ \ / _` | |/ _ \     " Cyan
+Write-Centered "| |___| (_) | (_) | (_| | | (_) |    " Cyan
+Write-Centered " \____|\___/ \___/ \__,_|_|\___/     " Cyan
+Write-Centered "                                     " Cyan
+Write-Centered "        COLEGIO CRUZEIRO TI          " White
+}
+
+# -------- DETECTAR INSTALADO --------
+
+function App-Instalado {
+    param($id)
+
+    $app = winget list --id $id -e 2>$null
+    if ($app) { return $true } else { return $false }
+}
+
+# -------- INSTALAR APP --------
+
+function Instalar-App {
+
+    param($nome,$id)
+
+    if (App-Instalado $id) {
+
+        Write-Centered "$nome já está instalado." Green
+
+    } else {
+
+        Write-Centered "Instalando $nome..." Yellow
+        winget install -e --id $id --silent
+    }
+}
+
+# -------- MENU NAVEGADORES --------
+
 function Menu-Navegadores {
 
-    Clear-Host
-    Linha
-    Write-Centered "NAVEGADORES" Cyan
-    Linha
-    Write-Host ""
+Clear-Host
+Linha
+Write-Centered "NAVEGADORES" Cyan
+Linha
 
-    Write-Centered "1 - Google Chrome"
-    Write-Centered "0 - Voltar" Gray
-    Write-Host ""
+Write-Centered "1 - Google Chrome"
+Write-Centered "0 - Voltar" Gray
 
-    $op = Read-Host "Escolha uma opção"
+$op = Read-Host "Escolha"
 
-    switch ($op) {
-        1 { winget install -e --id Google.Chrome }
-        0 { Menu-Principal }
-    }
+switch ($op) {
 
-    Pause
-    Menu-Navegadores
+1 { Instalar-App "Google Chrome" "Google.Chrome" }
+
+0 { Menu-Principal }
+
 }
 
-# ================================
-# MENU FERRAMENTAS
-# ================================
+Pause
+Menu-Navegadores
+}
+
+# -------- MENU FERRAMENTAS --------
+
 function Menu-Ferramentas {
 
-    Clear-Host
-    Linha
-    Write-Centered "FERRAMENTAS" Cyan
-    Linha
-    Write-Host ""
+Clear-Host
+Linha
+Write-Centered "FERRAMENTAS" Cyan
+Linha
 
-    Write-Centered "1 - 7zip"
-    Write-Centered "2 - VLC"
-    Write-Centered "0 - Voltar" Gray
-    Write-Host ""
+Write-Centered "1 - 7zip"
+Write-Centered "2 - VLC"
+Write-Centered "0 - Voltar" Gray
 
-    $op = Read-Host "Escolha uma opção"
+$op = Read-Host "Escolha"
 
-    switch ($op) {
-        1 { winget install -e --id 7zip.7zip }
-        2 { winget install -e --id VideoLAN.VLC }
-        0 { Menu-Principal }
-    }
+switch ($op) {
 
-    Pause
-    Menu-Ferramentas
+1 { Instalar-App "7zip" "7zip.7zip" }
+
+2 { Instalar-App "VLC" "VideoLAN.VLC" }
+
+0 { Menu-Principal }
+
 }
 
-# ================================
-# MENU SUPORTE
-# ================================
+Pause
+Menu-Ferramentas
+}
+
+# -------- MENU SUPORTE --------
+
 function Menu-Suporte {
 
-    Clear-Host
-    Linha
-    Write-Centered "SUPORTE TI" Cyan
-    Linha
-    Write-Host ""
+Clear-Host
+Linha
+Write-Centered "SUPORTE TI" Cyan
+Linha
 
-    Write-Centered "1 - AnyDesk"
-    Write-Centered "0 - Voltar" Gray
-    Write-Host ""
+Write-Centered "1 - AnyDesk"
+Write-Centered "0 - Voltar" Gray
 
-    $op = Read-Host "Escolha uma opção"
+$op = Read-Host "Escolha"
 
-    switch ($op) {
-        1 { winget install -e --id AnyDeskSoftwareGmbH.AnyDesk }
-        0 { Menu-Principal }
-    }
+switch ($op) {
 
-    Pause
-    Menu-Suporte
+1 { Instalar-App "AnyDesk" "AnyDeskSoftwareGmbH.AnyDesk" }
+
+0 { Menu-Principal }
+
 }
 
-# ================================
-# INSTALAR TUDO
-# ================================
+Pause
+Menu-Suporte
+}
+
+# -------- MENU SEGURANÇA --------
+
+function Menu-Seguranca {
+
+Clear-Host
+Linha
+Write-Centered "SEGURANCA" Cyan
+Linha
+
+Write-Centered "1 - Bitdefender"
+Write-Centered "2 - Microsoft Office"
+Write-Centered "0 - Voltar" Gray
+
+$op = Read-Host "Escolha"
+
+switch ($op) {
+
+1 {
+
+Write-Centered "Executando instalador Bitdefender..." Yellow
+Start-Process ".\bitdefender.exe" -ArgumentList "/silent" -Wait
+
+}
+
+2 {
+
+Write-Centered "Instalando Microsoft Office..." Yellow
+winget install -e --id Microsoft.OfficeDeploymentTool
+
+}
+
+0 { Menu-Principal }
+
+}
+
+Pause
+Menu-Seguranca
+}
+
+# -------- INSTALAR TUDO --------
+
 function Instalar-Tudo {
 
-    Clear-Host
-    Linha
-    Write-Centered "INSTALACAO COMPLETA" Yellow
-    Linha
-    Write-Host ""
+Clear-Host
+Linha
+Write-Centered "INSTALACAO COMPLETA" Green
+Linha
 
-    Write-Centered "Instalando Google Chrome..." Gray
-    winget install -e --id Google.Chrome
+Instalar-App "Google Chrome" "Google.Chrome"
+Instalar-App "7zip" "7zip.7zip"
+Instalar-App "VLC" "VideoLAN.VLC"
+Instalar-App "AnyDesk" "AnyDeskSoftwareGmbH.AnyDesk"
 
-    Write-Centered "Instalando 7zip..." Gray
-    winget install -e --id 7zip.7zip
+Write-Centered "Instalando Microsoft Office..." Yellow
+winget install -e --id Microsoft.OfficeDeploymentTool
 
-    Write-Centered "Instalando VLC..." Gray
-    winget install -e --id VideoLAN.VLC
+Write-Centered "Executando Bitdefender..." Yellow
+Start-Process ".\bitdefender.exe" -ArgumentList "/silent" -Wait
 
-    Write-Centered "Instalando AnyDesk..." Gray
-    winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
+Write-Centered "INSTALACAO FINALIZADA" Green
 
-    Write-Host ""
-    Write-Centered "PROCESSO FINALIZADO!" Green
-
-    Pause
-    Menu-Principal
+Pause
+Menu-Principal
 }
 
-# ================================
-# MENU PRINCIPAL
-# ================================
+# -------- MENU PRINCIPAL --------
+
 function Menu-Principal {
 
-    Clear-Host
+Clear-Host
 
-    Linha
-    Write-Centered "INSTALADOR DE APPS" White
-    Write-Centered "COLEGIO CRUZEIRO" Cyan
-    Linha
-    Write-Host ""
+Logo
+Linha
 
-    Write-Centered "1 - Navegadores"
-    Write-Centered "2 - Ferramentas"
-    Write-Centered "3 - Suporte TI"
-    Write-Centered "4 - Instalar tudo" Green
-    Write-Centered "0 - Sair" Red
-    Write-Host ""
+Write-Centered "1 - Navegadores"
+Write-Centered "2 - Ferramentas"
+Write-Centered "3 - Suporte TI"
+Write-Centered "4 - Segurança"
+Write-Centered "5 - Instalar tudo" Green
+Write-Centered "0 - Sair" Red
 
-    $op = Read-Host "Escolha uma opção"
+$op = Read-Host "Escolha"
 
-    switch ($op) {
-        1 { Menu-Navegadores }
-        2 { Menu-Ferramentas }
-        3 { Menu-Suporte }
-        4 { Instalar-Tudo }
-        0 { exit }
-    }
+switch ($op) {
+
+1 { Menu-Navegadores }
+
+2 { Menu-Ferramentas }
+
+3 { Menu-Suporte }
+
+4 { Menu-Seguranca }
+
+5 { Instalar-Tudo }
+
+0 { exit }
+
 }
 
-# ================================
-# INICIAR SCRIPT
-# ================================
+}
+
+# -------- INICIAR --------
+
 Menu-Principal
