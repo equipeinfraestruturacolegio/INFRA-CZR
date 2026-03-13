@@ -2,22 +2,43 @@
 # INSTALADOR CORPORATIVO - COLEGIO CRUZEIRO
 # ======================================================
 
+# -------- VERIFICAR ADMIN --------
+
+if (!([Security.Principal.WindowsPrincipal] `
+[Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+[Security.Principal.WindowsBuiltInRole] "Administrator"))
+{
+Write-Host "Execute o script como Administrador!" -ForegroundColor Red
+Pause
+Exit
+}
+
+# -------- LOG --------
+
+Start-Transcript "$env:TEMP\deploy_apps_czr.log"
+
+# -------- VISUAL --------
+
 $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.UI.RawUI.ForegroundColor = "White"
 Clear-Host
 
-# -------- FUNÇÕES VISUAIS --------
+# -------- CENTRALIZAR TEXTO --------
 
 function Write-Centered {
-    param($text,$color="White")
 
-    $width = $Host.UI.RawUI.WindowSize.Width
-    $padding = [math]::Max(0,($width-$text.Length)/2)
-    Write-Host (" " * [int]$padding + $text) -ForegroundColor $color
+param($text,$color="White")
+
+$width = $Host.UI.RawUI.WindowSize.Width
+$padding = [math]::Max(0,($width-$text.Length)/2)
+
+Write-Host (" " * [int]$padding + $text) -ForegroundColor $color
 }
 
 function Linha {
-    Write-Centered "===================================================" Yellow
+
+Write-Centered "===================================================" Yellow
+
 }
 
 # -------- LOGO --------
@@ -31,32 +52,66 @@ Write-Centered "| |___| (_) | (_) | (_| | | (_) |    " Cyan
 Write-Centered " \____|\___/ \___/ \__,_|_|\___/     " Cyan
 Write-Centered "                                     " Cyan
 Write-Centered "        COLEGIO CRUZEIRO TI          " White
+
 }
 
-# -------- DETECTAR INSTALADO --------
+# -------- VERIFICAR APP --------
 
 function App-Instalado {
-    param($id)
 
-    $app = winget list --id $id -e 2>$null
-    if ($app) { return $true } else { return $false }
+param($id)
+
+$app = winget list --id $id -e 2>$null
+
+if ($app) { return $true }
+else { return $false }
+
 }
 
 # -------- INSTALAR APP --------
 
 function Instalar-App {
 
-    param($nome,$id)
+param($nome,$id)
 
-    if (App-Instalado $id) {
+if (App-Instalado $id) {
 
-        Write-Centered "$nome já está instalado." Green
+Write-Centered "$nome já está instalado." Green
 
-    } else {
+}
 
-        Write-Centered "Instalando $nome..." Yellow
-        winget install -e --id $id --silent
-    }
+else {
+
+Write-Centered "Instalando $nome..." Yellow
+
+winget install -e --id $id `
+--accept-package-agreements `
+--accept-source-agreements `
+--silent
+
+}
+
+}
+
+# -------- INSTALAR BITDEFENDER --------
+
+function Instalar-Bitdefender {
+
+$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$bd = "$scriptPath\bitdefender.exe"
+
+if (Test-Path $bd) {
+
+Write-Centered "Instalando Bitdefender..." Yellow
+Start-Process $bd -ArgumentList "/silent" -Wait
+
+}
+else {
+
+Write-Centered "Instalador do Bitdefender não encontrado." Red
+
+}
+
 }
 
 # -------- MENU NAVEGADORES --------
@@ -83,6 +138,7 @@ switch ($op) {
 
 Pause
 Menu-Navegadores
+
 }
 
 # -------- MENU FERRAMENTAS --------
@@ -112,6 +168,7 @@ switch ($op) {
 
 Pause
 Menu-Ferramentas
+
 }
 
 # -------- MENU SUPORTE --------
@@ -138,6 +195,7 @@ switch ($op) {
 
 Pause
 Menu-Suporte
+
 }
 
 # -------- MENU SEGURANÇA --------
@@ -157,17 +215,15 @@ $op = Read-Host "Escolha"
 
 switch ($op) {
 
-1 {
-
-Write-Centered "Executando instalador Bitdefender..." Yellow
-Start-Process ".\bitdefender.exe" -ArgumentList "/silent" -Wait
-
-}
+1 { Instalar-Bitdefender }
 
 2 {
 
 Write-Centered "Instalando Microsoft Office..." Yellow
-winget install -e --id Microsoft.OfficeDeploymentTool
+winget install -e --id Microsoft.OfficeDeploymentTool `
+--accept-package-agreements `
+--accept-source-agreements `
+--silent
 
 }
 
@@ -177,6 +233,7 @@ winget install -e --id Microsoft.OfficeDeploymentTool
 
 Pause
 Menu-Seguranca
+
 }
 
 # -------- INSTALAR TUDO --------
@@ -194,15 +251,19 @@ Instalar-App "VLC" "VideoLAN.VLC"
 Instalar-App "AnyDesk" "AnyDeskSoftwareGmbH.AnyDesk"
 
 Write-Centered "Instalando Microsoft Office..." Yellow
-winget install -e --id Microsoft.OfficeDeploymentTool
 
-Write-Centered "Executando Bitdefender..." Yellow
-Start-Process ".\bitdefender.exe" -ArgumentList "/silent" -Wait
+winget install -e --id Microsoft.OfficeDeploymentTool `
+--accept-package-agreements `
+--accept-source-agreements `
+--silent
+
+Instalar-Bitdefender
 
 Write-Centered "INSTALACAO FINALIZADA" Green
 
 Pause
 Menu-Principal
+
 }
 
 # -------- MENU PRINCIPAL --------
@@ -235,7 +296,12 @@ switch ($op) {
 
 5 { Instalar-Tudo }
 
-0 { exit }
+0 {
+
+Stop-Transcript
+Exit
+
+}
 
 }
 
