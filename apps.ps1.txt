@@ -1,74 +1,87 @@
+# Script: Instalador de Apps Colégio Cruzeiro
+# Melhores Práticas: Cores adicionadas para facilitar a leitura
+
 function Menu-Navegadores {
     Clear-Host
-    Write-Host "===== NAVEGADORES ====="
-    Write-Host "1 - Google Chrome"
-    Write-Host "0 - Voltar"
+    [cite_start]Write-Host "===== NAVEGADORES =====" -ForegroundColor Cyan [cite: 1]
+    [cite_start]Write-Host "1 - Google Chrome" [cite: 1]
+    [cite_start]Write-Host "0 - Voltar" -ForegroundColor Gray [cite: 1]
+    Write-Host ""
 
-    $op = Read-Host "Escolha"
+    [cite_start]$op = Read-Host "Escolha uma opção" [cite: 1]
 
     switch ($op) {
-        1 { winget install -e --id Google.Chrome }
-        0 { Menu-Principal }
+        [cite_start]1 { winget install -e --id Google.Chrome } [cite: 1]
+        [cite_start]0 { Menu-Principal } [cite: 1]
     }
 }
 
 function Menu-Ferramentas {
     Clear-Host
-    Write-Host "===== FERRAMENTAS ====="
-    Write-Host "1 - 7zip"
-    Write-Host "2 - VLC"
-    Write-Host "0 - Voltar"
+    [cite_start]Write-Host "===== FERRAMENTAS =====" -ForegroundColor Cyan [cite: 2]
+    [cite_start]Write-Host "1 - 7zip" [cite: 2]
+    [cite_start]Write-Host "2 - VLC" [cite: 2]
+    [cite_start]Write-Host "0 - Voltar" -ForegroundColor Gray [cite: 2]
+    Write-Host ""
 
-    $op = Read-Host "Escolha"
+    [cite_start]$op = Read-Host "Escolha uma opção" [cite: 2]
 
     switch ($op) {
-        1 { winget install -e --id 7zip.7zip }
-        2 { winget install -e --id VideoLAN.VLC }
-        0 { Menu-Principal }
+        [cite_start]1 { winget install -e --id 7zip.7zip } [cite: 2]
+        [cite_start]2 { winget install -e --id VideoLAN.VLC } [cite: 2]
+        [cite_start]0 { Menu-Principal } [cite: 2]
     }
 }
 
 function Menu-Suporte {
     Clear-Host
-    Write-Host "===== SUPORTE TI ====="
-    Write-Host "1 - AnyDesk"
-    Write-Host "0 - Voltar"
+    [cite_start]Write-Host "===== SUPORTE TI =====" -ForegroundColor Cyan [cite: 3]
+    [cite_start]Write-Host "1 - AnyDesk" [cite: 3]
+    [cite_start]Write-Host "0 - Voltar" -ForegroundColor Gray [cite: 3]
+    Write-Host ""
 
-    $op = Read-Host "Escolha"
+    [cite_start]$op = Read-Host "Escolha uma opção" [cite: 3]
 
     switch ($op) {
-        1 { winget install -e --id AnyDeskSoftwareGmbH.AnyDesk }
-        0 { Menu-Principal }
+        [cite_start]1 { winget install -e --id AnyDeskSoftwareGmbH.AnyDesk } [cite: 3]
+        [cite_start]0 { Menu-Principal } [cite: 3]
     }
 }
 
 function Instalar-Tudo {
-    winget install -e --id Google.Chrome
-    winget install -e --id 7zip.7zip
-    winget install -e --id VideoLAN.VLC
-    winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
+    [cite_start]Write-Host "Iniciando instalação completa..." -ForegroundColor Yellow [cite: 4]
+    [cite_start]winget install -e --id Google.Chrome [cite: 4]
+    [cite_start]winget install -e --id 7zip.7zip [cite: 4]
+    [cite_start]winget install -e --id VideoLAN.VLC [cite: 4]
+    [cite_start]winget install -e --id AnyDeskSoftwareGmbH.AnyDesk [cite: 4]
+    Write-Host "Processo finalizado!" [cite_start]-ForegroundColor Green [cite: 4]
+    Pause
+    Menu-Principal
 }
 
 function Menu-Principal {
     Clear-Host
-    Write-Host "================================"
-    Write-Host " INSTALADOR DE APPS DO COLEGIO CRUZEIRO "
-    Write-Host "================================"
-    Write-Host "1 - Navegadores"
-    Write-Host "2 - Ferramentas"
-    Write-Host "3 - Suporte TI"
-    Write-Host "4 - Instalar tudo"
-    Write-Host "0 - Sair"
+    [cite_start]Write-Host "========================================" -ForegroundColor Yellow [cite: 4]
+    [cite_start]Write-Host "  INSTALADOR DE APPS DO COLEGIO CRUZEIRO " -ForegroundColor White -BackgroundColor DarkBlue [cite: 4]
+    [cite_start]Write-Host "========================================" -ForegroundColor Yellow [cite: 4]
+    Write-Host ""
+    [cite_start]Write-Host "1 - Navegadores" [cite: 4]
+    [cite_start]Write-Host "2 - Ferramentas" [cite: 4]
+    [cite_start]Write-Host "3 - Suporte TI" [cite: 4]
+    [cite_start]Write-Host "4 - Instalar tudo" -ForegroundColor Green [cite: 4]
+    [cite_start]Write-Host "0 - Sair" -ForegroundColor Red [cite: 4, 5]
+    Write-Host ""
 
-    $op = Read-Host "Escolha uma opção"
+    [cite_start]$op = Read-Host "Escolha uma opção" [cite: 4]
 
     switch ($op) {
-        1 { Menu-Navegadores }
-        2 { Menu-Ferramentas }
-        3 { Menu-Suporte }
-        4 { Instalar-Tudo }
-        0 { exit }
+        [cite_start]1 { Menu-Navegadores } [cite: 4]
+        [cite_start]2 { Menu-Ferramentas } [cite: 4]
+        [cite_start]3 { Menu-Suporte } [cite: 4]
+        [cite_start]4 { Instalar-Tudo } [cite: 4]
+        [cite_start]0 { exit } [cite: 5]
     }
 }
 
+# Iniciar o script
 Menu-Principal
