@@ -1,27 +1,31 @@
+# Script: Instalador de Apps Colégio Cruzeiro - Versão Centralizada
+
 function Menu-Principal {
     Clear-Host
-    # Calcula o centro da tela
+    # Obtém a largura da janela do console para calcular o centro
     $largura = (Get-Host).UI.RawUI.WindowSize.Width
     $titulo = "INSTALADOR DE APPS DO COLEGIO CRUZEIRO"
-    $pad = [math]::max(0, [int](($largura - $titulo.Length) / 2))
-    $espaco = " " * $pad
-
-    Write-Host "" # Pula linha no topo
-    Write-Host "$espaco========================================" -ForegroundColor Yellow
-    Write-Host "$espaco  $titulo  " -ForegroundColor White -BackgroundColor DarkBlue
-    Write-Host "$espaco========================================" -ForegroundColor Yellow
-    Write-Host ""
     
-    # Centralizando as opções (ajuste o valor 15 conforme achar melhor)
-    $padOpcoes = $pad + 5
+    # Cálculos de espaçamento para centralizar
+    $padTitulo = [math]::max(0, [int](($largura - 40) / 2))
+    $espacoT = " " * $padTitulo
+    $padOpcoes = $padTitulo + 5
     $espOp = " " * $padOpcoes
 
+    # Espaçamento vertical para descer o menu (parece maior e centralizado)
+    Write-Host "`n`n"
+
+    Write-Host "$espacoT ========================================" -ForegroundColor Yellow
+    Write-Host "$espacoT  $titulo  " -ForegroundColor White -BackgroundColor DarkBlue
+    Write-Host "$espacoT ========================================" -ForegroundColor Yellow
+    Write-Host ""
+    
     Write-Host "$espOp 1 - Navegadores"
     Write-Host "$espOp 2 - Ferramentas"
     Write-Host "$espOp 3 - Suporte TI"
     Write-Host "$espOp 4 - Instalar tudo" -ForegroundColor Green
     Write-Host "$espOp 0 - Sair" -ForegroundColor Red
-    Write-Host ""
+    Write-Host "`n"
     
     $op = Read-Host "$espOp Escolha uma opção"
 
@@ -33,3 +37,76 @@ function Menu-Principal {
         0 { exit }
     }
 }
+
+function Menu-Navegadores {
+    Clear-Host
+    $largura = (Get-Host).UI.RawUI.WindowSize.Width
+    $pad = [math]::max(0, [int](($largura - 25) / 2))
+    $esp = " " * $pad
+
+    Write-Host "`n`n"
+    Write-Host "$esp ===== NAVEGADORES =====" -ForegroundColor Cyan
+    Write-Host "$esp 1 - Google Chrome"
+    Write-Host "$esp 0 - Voltar" -ForegroundColor Gray
+    Write-Host ""
+
+    $op = Read-Host "$esp Escolha"
+    switch ($op) {
+        1 { winget install -e --id Google.Chrome }
+        0 { Menu-Principal }
+    }
+}
+
+function Menu-Ferramentas {
+    Clear-Host
+    $largura = (Get-Host).UI.RawUI.WindowSize.Width
+    $pad = [math]::max(0, [int](($largura - 25) / 2))
+    $esp = " " * $pad
+
+    Write-Host "`n`n"
+    Write-Host "$esp ===== FERRAMENTAS =====" -ForegroundColor Cyan
+    Write-Host "$esp 1 - 7zip"
+    Write-Host "$esp 2 - VLC"
+    Write-Host "$esp 0 - Voltar" -ForegroundColor Gray
+    Write-Host ""
+
+    $op = Read-Host "$esp Escolha"
+    switch ($op) {
+        1 { winget install -e --id 7zip.7zip }
+        2 { winget install -e --id VideoLAN.VLC }
+        0 { Menu-Principal }
+    }
+}
+
+function Menu-Suporte {
+    Clear-Host
+    $largura = (Get-Host).UI.RawUI.WindowSize.Width
+    $pad = [math]::max(0, [int](($largura - 25) / 2))
+    $esp = " " * $pad
+
+    Write-Host "`n`n"
+    Write-Host "$esp ===== SUPORTE TI =====" -ForegroundColor Cyan
+    Write-Host "$esp 1 - AnyDesk"
+    Write-Host "$esp 0 - Voltar" -ForegroundColor Gray
+    Write-Host ""
+
+    $op = Read-Host "$esp Escolha"
+    switch ($op) {
+        1 { winget install -e --id AnyDeskSoftwareGmbH.AnyDesk }
+        0 { Menu-Principal }
+    }
+}
+
+function Instalar-Tudo {
+    Write-Host "`nIniciando instalação completa..." -ForegroundColor Yellow
+    winget install -e --id Google.Chrome
+    winget install -e --id 7zip.7zip
+    winget install -e --id VideoLAN.VLC
+    winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
+    Write-Host "`nProcesso finalizado!" -ForegroundColor Green
+    Pause
+    Menu-Principal
+}
+
+# Execução inicial
+Menu-Principal
