@@ -1,10 +1,42 @@
-# Script: Instalador de Apps Colégio Cruzeiro
+# ================================
+# INSTALADOR DE APPS - COLEGIO CRUZEIRO
+# ================================
 
+# Fundo preto e texto branco
+$Host.UI.RawUI.BackgroundColor = "Black"
+$Host.UI.RawUI.ForegroundColor = "White"
+Clear-Host
+
+# Função para centralizar texto
+function Write-Centered {
+    param(
+        [string]$Text,
+        [string]$Color = "White"
+    )
+
+    $width = $Host.UI.RawUI.WindowSize.Width
+    $padding = [math]::Max(0, ($width - $Text.Length) / 2)
+    Write-Host (" " * [int]$padding + $Text) -ForegroundColor $Color
+}
+
+# Linha separadora
+function Linha {
+    Write-Centered "============================================" Yellow
+}
+
+# ================================
+# MENU NAVEGADORES
+# ================================
 function Menu-Navegadores {
+
     Clear-Host
-    Write-Host "===== NAVEGADORES =====" -ForegroundColor Cyan
-    Write-Host "1 - Google Chrome"
-    Write-Host "0 - Voltar" -ForegroundColor Gray
+    Linha
+    Write-Centered "NAVEGADORES" Cyan
+    Linha
+    Write-Host ""
+
+    Write-Centered "1 - Google Chrome"
+    Write-Centered "0 - Voltar" Gray
     Write-Host ""
 
     $op = Read-Host "Escolha uma opção"
@@ -13,14 +45,25 @@ function Menu-Navegadores {
         1 { winget install -e --id Google.Chrome }
         0 { Menu-Principal }
     }
+
+    Pause
+    Menu-Navegadores
 }
 
+# ================================
+# MENU FERRAMENTAS
+# ================================
 function Menu-Ferramentas {
+
     Clear-Host
-    Write-Host "===== FERRAMENTAS =====" -ForegroundColor Cyan
-    Write-Host "1 - 7zip"
-    Write-Host "2 - VLC"
-    Write-Host "0 - Voltar" -ForegroundColor Gray
+    Linha
+    Write-Centered "FERRAMENTAS" Cyan
+    Linha
+    Write-Host ""
+
+    Write-Centered "1 - 7zip"
+    Write-Centered "2 - VLC"
+    Write-Centered "0 - Voltar" Gray
     Write-Host ""
 
     $op = Read-Host "Escolha uma opção"
@@ -30,13 +73,24 @@ function Menu-Ferramentas {
         2 { winget install -e --id VideoLAN.VLC }
         0 { Menu-Principal }
     }
+
+    Pause
+    Menu-Ferramentas
 }
 
+# ================================
+# MENU SUPORTE
+# ================================
 function Menu-Suporte {
+
     Clear-Host
-    Write-Host "===== SUPORTE TI =====" -ForegroundColor Cyan
-    Write-Host "1 - AnyDesk"
-    Write-Host "0 - Voltar" -ForegroundColor Gray
+    Linha
+    Write-Centered "SUPORTE TI" Cyan
+    Linha
+    Write-Host ""
+
+    Write-Centered "1 - AnyDesk"
+    Write-Centered "0 - Voltar" Gray
     Write-Host ""
 
     $op = Read-Host "Escolha uma opção"
@@ -45,30 +99,59 @@ function Menu-Suporte {
         1 { winget install -e --id AnyDeskSoftwareGmbH.AnyDesk }
         0 { Menu-Principal }
     }
+
+    Pause
+    Menu-Suporte
 }
 
+# ================================
+# INSTALAR TUDO
+# ================================
 function Instalar-Tudo {
-    Write-Host "Iniciando instalação completa..." -ForegroundColor Yellow
+
+    Clear-Host
+    Linha
+    Write-Centered "INSTALACAO COMPLETA" Yellow
+    Linha
+    Write-Host ""
+
+    Write-Centered "Instalando Google Chrome..." Gray
     winget install -e --id Google.Chrome
+
+    Write-Centered "Instalando 7zip..." Gray
     winget install -e --id 7zip.7zip
+
+    Write-Centered "Instalando VLC..." Gray
     winget install -e --id VideoLAN.VLC
+
+    Write-Centered "Instalando AnyDesk..." Gray
     winget install -e --id AnyDeskSoftwareGmbH.AnyDesk
-    Write-Host "Processo finalizado!" -ForegroundColor Green
+
+    Write-Host ""
+    Write-Centered "PROCESSO FINALIZADO!" Green
+
     Pause
     Menu-Principal
 }
 
+# ================================
+# MENU PRINCIPAL
+# ================================
 function Menu-Principal {
+
     Clear-Host
-    Write-Host "========================================" -ForegroundColor Yellow
-    Write-Host "  INSTALADOR DE APPS DO COLEGIO CRUZEIRO " -ForegroundColor White -BackgroundColor DarkBlue
-    Write-Host "========================================" -ForegroundColor Yellow
+
+    Linha
+    Write-Centered "INSTALADOR DE APPS" White
+    Write-Centered "COLEGIO CRUZEIRO" Cyan
+    Linha
     Write-Host ""
-    Write-Host "1 - Navegadores"
-    Write-Host "2 - Ferramentas"
-    Write-Host "3 - Suporte TI"
-    Write-Host "4 - Instalar tudo" -ForegroundColor Green
-    Write-Host "0 - Sair" -ForegroundColor Red
+
+    Write-Centered "1 - Navegadores"
+    Write-Centered "2 - Ferramentas"
+    Write-Centered "3 - Suporte TI"
+    Write-Centered "4 - Instalar tudo" Green
+    Write-Centered "0 - Sair" Red
     Write-Host ""
 
     $op = Read-Host "Escolha uma opção"
@@ -82,5 +165,7 @@ function Menu-Principal {
     }
 }
 
-# Iniciar o script
+# ================================
+# INICIAR SCRIPT
+# ================================
 Menu-Principal
