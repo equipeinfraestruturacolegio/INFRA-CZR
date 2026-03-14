@@ -13,6 +13,60 @@ Pause
 Exit
 }
 
+# -------- AJUSTAR CONSOLE (FONTE 28 + TELA CHEIA) --------
+
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public class ConsoleHelper
+{
+    [StructLayout(LayoutKind.Sequential)]
+    public struct COORD
+    {
+        public short X;
+        public short Y;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct CONSOLE_FONT_INFO_EX
+    {
+        public int cbSize;
+        public int nFont;
+        public COORD dwFontSize;
+        public int FontFamily;
+        public int FontWeight;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+        public string FaceName;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool SetCurrentConsoleFontEx(
+        IntPtr consoleOutput,
+        bool maximumWindow,
+        ref CONSOLE_FONT_INFO_EX consoleCurrentFontEx
+    );
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr GetStdHandle(int dwType);
+}
+"@
+
+$handle = [ConsoleHelper]::GetStdHandle(-11)
+
+$font = New-Object ConsoleHelper+CONSOLE_FONT_INFO_EX
+$font.cbSize = [Runtime.InteropServices.Marshal]::SizeOf($font)
+$font.FaceName = "Consolas"
+$font.dwFontSize.X = 0
+$font.dwFontSize.Y = 28
+
+[ConsoleHelper]::SetCurrentConsoleFontEx($handle,$false,[ref]$font)
+
+# maximizar janela
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.SendKeys]::SendWait("%{ENTER}")
+
 # -------- LOG --------
 
 Start-Transcript "$env:TEMP\deploy_apps_czr.log"
