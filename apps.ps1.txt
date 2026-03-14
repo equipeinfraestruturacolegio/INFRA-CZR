@@ -13,7 +13,7 @@ Pause
 Exit
 }
 
-# -------- AJUSTAR CONSOLE (FONTE 28 + TELA CHEIA) --------
+# -------- FONTE 28 + TELA MAXIMIZADA --------
 
 Add-Type -TypeDefinition @"
 using System;
@@ -63,7 +63,6 @@ $font.dwFontSize.Y = 28
 
 [ConsoleHelper]::SetCurrentConsoleFontEx($handle,$false,[ref]$font)
 
-# maximizar janela
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.SendKeys]::SendWait("%{ENTER}")
 
@@ -74,7 +73,7 @@ Start-Transcript "$env:TEMP\deploy_apps_czr.log"
 # -------- VISUAL --------
 
 $Host.UI.RawUI.BackgroundColor = "Black"
-$Host.UI.RawUI.ForegroundColor = "White"
+$Host.UI.RawUI.ForegroundColor = "Green"
 Clear-Host
 
 # -------- CENTRALIZAR TEXTO --------
@@ -83,15 +82,19 @@ function Write-Centered {
 
 param($text,$color="White")
 
-$width = $Host.UI.RawUI.WindowSize.Width
-$padding = [math]::Max(0,($width-$text.Length)/2)
+$consoleWidth = 90
+$windowWidth = $Host.UI.RawUI.WindowSize.Width
 
-Write-Host (" " * [int]$padding + $text) -ForegroundColor $color
+$padding = [math]::Max(0,($consoleWidth-$text.Length)/2)
+$sideSpace = [math]::Max(0,($windowWidth-$consoleWidth)/2)
+
+Write-Host (" " * [int]($sideSpace + $padding) + $text) -ForegroundColor $color
+
 }
 
 function Linha {
 
-Write-Centered "===================================================" Yellow
+Write-Centered "════════════════════════════════════════════════════" Yellow
 
 }
 
@@ -107,7 +110,7 @@ Write-Centered " ╚██████╗╚██████╔╝████
 Write-Centered "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝ ╚═════╝ ╚═╝ ╚═════╝ " Cyan
 Write-Centered ""
 Write-Centered "            COLEGIO CRUZEIRO TI            " White
-Write-Centered "====================================================" Yellow
+Write-Centered "════════════════════════════════════════════════════" Yellow
 
 }
 
@@ -117,28 +120,34 @@ function App-Instalado {
 
 param($id)
 
-$app = winget list --id $id -e 2>$null
+$result = winget list --id $id -e 2>$null | Out-String
 
-if ($app) { return $true }
-else { return $false }
+if ($result -match $id) {
+return $true
+}
+else {
+return $false
+}
 
 }
 
-# -------- INSTALAR APP --------
+# -------- INSTALAR APPS PARALELO --------
 
-function Instalar-App {
+function Instalar-Apps-Paralelo {
+
+param($apps)
+
+$jobs = @()
+
+foreach ($app in $apps) {
+
+$jobs += Start-Job -ScriptBlock {
 
 param($nome,$id)
 
-if (App-Instalado $id) {
+$result = winget list --id $id -e 2>$null | Out-String
 
-Write-Centered "$nome já está instalado." Green
-
-}
-
-else {
-
-Write-Centered "Instalando $nome..." Yellow
+if ($result -notmatch $id) {
 
 winget install -e --id $id `
 --accept-package-agreements `
@@ -146,6 +155,31 @@ winget install -e --id $id `
 --silent
 
 }
+
+} -ArgumentList $app.nome,$app.id
+
+}
+
+Write-Centered "Instalando aplicativos..." Cyan
+
+while ($jobs.State -contains "Running") {
+
+$done = ($jobs | Where-Object State -eq "Completed").Count
+$total = $jobs.Count
+
+$percent = ($done / $total) * 100
+
+Write-Progress `
+-Activity "Instalação em andamento" `
+-Status "$done de $total concluídos" `
+-PercentComplete $percent
+
+Start-Sleep 1
+
+}
+
+Receive-Job $jobs | Out-Null
+Remove-Job $jobs
 
 }
 
@@ -186,7 +220,15 @@ $op = Read-Host "Escolha"
 
 switch ($op) {
 
-1 { Instalar-App "Google Chrome" "Google.Chrome" }
+1 {
+
+$apps = @(
+@{nome="Google Chrome"; id="Google.Chrome"}
+)
+
+Instalar-Apps-Paralelo $apps
+
+}
 
 0 { Menu-Principal }
 
@@ -214,9 +256,25 @@ $op = Read-Host "Escolha"
 
 switch ($op) {
 
-1 { Instalar-App "7zip" "7zip.7zip" }
+1 {
 
-2 { Instalar-App "VLC" "VideoLAN.VLC" }
+$apps = @(
+@{nome="7zip"; id="7zip.7zip"}
+)
+
+Instalar-Apps-Paralelo $apps
+
+}
+
+2 {
+
+$apps = @(
+@{nome="VLC"; id="VideoLAN.VLC"}
+)
+
+Instalar-Apps-Paralelo $apps
+
+}
 
 0 { Menu-Principal }
 
@@ -243,7 +301,15 @@ $op = Read-Host "Escolha"
 
 switch ($op) {
 
-1 { Instalar-App "AnyDesk" "AnyDeskSoftwareGmbH.AnyDesk" }
+1 {
+
+$apps = @(
+@{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
+)
+
+Instalar-Apps-Paralelo $apps
+
+}
 
 0 { Menu-Principal }
 
@@ -276,6 +342,7 @@ switch ($op) {
 2 {
 
 Write-Centered "Instalando Microsoft Office..." Yellow
+
 winget install -e --id Microsoft.OfficeDeploymentTool `
 --accept-package-agreements `
 --accept-source-agreements `
@@ -301,10 +368,14 @@ Linha
 Write-Centered "INSTALACAO COMPLETA" Green
 Linha
 
-Instalar-App "Google Chrome" "Google.Chrome"
-Instalar-App "7zip" "7zip.7zip"
-Instalar-App "VLC" "VideoLAN.VLC"
-Instalar-App "AnyDesk" "AnyDeskSoftwareGmbH.AnyDesk"
+$apps = @(
+@{nome="Google Chrome"; id="Google.Chrome"}
+@{nome="7zip"; id="7zip.7zip"}
+@{nome="VLC"; id="VideoLAN.VLC"}
+@{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
+)
+
+Instalar-Apps-Paralelo $apps
 
 Write-Centered "Instalando Microsoft Office..." Yellow
 
@@ -343,13 +414,9 @@ $op = Read-Host "Escolha"
 switch ($op) {
 
 1 { Menu-Navegadores }
-
 2 { Menu-Ferramentas }
-
 3 { Menu-Suporte }
-
 4 { Menu-Seguranca }
-
 5 { Instalar-Tudo }
 
 0 {
