@@ -6,8 +6,8 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 # -------- VERIFICAR ADMIN --------
 
-if (!([Security.Principal.WindowsPrincipal] `
-[Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+if (!([Security.Principal.WindowsPrincipal]
+[Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
 [Security.Principal.WindowsBuiltInRole] "Administrator"))
 {
 Write-Host "Execute o PowerShell como Administrador!" -ForegroundColor Red
@@ -63,6 +63,53 @@ Linha
 
 }
 
+# -------- LOGIN --------
+
+function Sistema-Login {
+
+$usuarioCorreto = "admin"
+$senhaCorreta = "1234"
+
+$tentativas = 0
+$maxTentativas = 3
+
+while ($tentativas -lt $maxTentativas) {
+
+Clear-Host
+Linha
+Write-Centered "ACESSO RESTRITO - COLEGIO CRUZEIRO TI" Cyan
+Linha
+
+$usuario = Read-Host "sbht-ti"
+$senha = Read-Host "infra@2026"
+
+if ($usuario -eq $usuarioCorreto -and $senha -eq $senhaCorreta) {
+
+Write-Centered "Login realizado com sucesso!" Green
+Start-Sleep 1
+Menu-Principal
+return
+
+}
+
+else {
+
+$tentativas++
+
+Write-Centered "Usuario ou senha incorretos!" Red
+Write-Centered "Tentativa $tentativas de $maxTentativas" Yellow
+Start-Sleep 2
+
+}
+
+}
+
+Write-Centered "ACESSO BLOQUEADO!" Red
+Start-Sleep 2
+Exit
+
+}
+
 # -------- INSTALAR APPS --------
 
 function Instalar-Apps {
@@ -111,6 +158,50 @@ Invoke-WebRequest $url -OutFile $dest
 Write-Centered "Instalando Bitdefender..." Yellow
 
 Start-Process $dest -ArgumentList "/silent" -Wait
+
+Pause
+
+}
+
+# -------- OFFICE 2016 --------
+
+function Instalar-Office2016 {
+
+$officePath = "$env:TEMP\Office2016"
+New-Item -ItemType Directory -Force -Path $officePath | Out-Null
+
+Write-Centered "Baixando Office Deployment Tool..." Yellow
+
+$url = "https://download.microsoft.com/download/0/2/A/02A7D4D6-7D2C-4E36-9A8B-2E8D9D4F9F9F/officedeploymenttool.exe"
+$odt = "$officePath\odt.exe"
+
+Invoke-WebRequest $url -OutFile $odt
+
+Start-Process $odt -ArgumentList "/quiet /extract:$officePath" -Wait
+
+Write-Centered "Criando configuracao Office 2016..." Yellow
+
+$xml = @"
+<Configuration>
+  <Add OfficeClientEdition="64" Channel="PerpetualVL2016">
+    <Product ID="ProPlusVolume">
+      <Language ID="pt-br"/>
+    </Product>
+  </Add>
+  <Display Level="None" AcceptEULA="TRUE"/>
+</Configuration>
+"@
+
+$xmlPath = "$officePath\config.xml"
+$xml | Out-File -Encoding UTF8 $xmlPath
+
+Write-Centered "Baixando Office 2016..." Cyan
+Start-Process "$officePath\setup.exe" -ArgumentList "/download $xmlPath" -Wait
+
+Write-Centered "Instalando Office 2016..." Green
+Start-Process "$officePath\setup.exe" -ArgumentList "/configure $xmlPath" -Wait
+
+Write-Centered "Office 2016 instalado com sucesso!" Green
 
 Pause
 
@@ -233,7 +324,7 @@ Write-Centered "SEGURANCA" Cyan
 Linha
 
 Write-Centered "1 - Bitdefender"
-Write-Centered "2 - Microsoft Office"
+Write-Centered "2 - Microsoft Office 2016"
 Write-Centered "0 - Voltar" Gray
 
 $op = Read-Host "Escolha"
@@ -242,18 +333,7 @@ switch ($op) {
 
 1 { Instalar-Bitdefender }
 
-2 {
-
-Write-Centered "Instalando Microsoft Office..." Yellow
-
-winget install -e --id Microsoft.OfficeDeploymentTool `
---accept-package-agreements `
---accept-source-agreements `
---silent
-
-Pause
-
-}
+2 { Instalar-Office2016 }
 
 }
 
@@ -279,13 +359,7 @@ $apps = @(
 
 Instalar-Apps $apps
 
-Write-Centered "Instalando Microsoft Office..." Yellow
-
-winget install -e --id Microsoft.OfficeDeploymentTool `
---accept-package-agreements `
---accept-source-agreements `
---silent
-
+Instalar-Office2016
 Instalar-Bitdefender
 
 Write-Centered "INSTALACAO FINALIZADA" Green
@@ -333,4 +407,4 @@ Exit
 
 # -------- INICIAR --------
 
-Menu-Principal
+Sistema-Login
