@@ -115,6 +115,77 @@ Linha
 
 }
 
+# -------- LIMPEZA DO SISTEMA --------
+
+function Limpar-Temp {
+
+Write-Centered "Limpando TEMP do Windows..." Yellow
+Remove-Item "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Centered "Limpeza concluida" Green
+Pause
+
+}
+
+function Limpar-TempUsuario {
+
+Write-Centered "Limpando TEMP do usuario..." Yellow
+Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+Write-Centered "Limpeza concluida" Green
+Pause
+
+}
+
+function Limpeza-Disco {
+
+Write-Centered "Abrindo Limpeza de Disco..." Yellow
+Start-Process cleanmgr
+Pause
+
+}
+
+function Limpar-WindowsUpdate {
+
+Write-Centered "Limpando cache do Windows Update..." Yellow
+
+Stop-Service wuauserv -Force
+Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
+Start-Service wuauserv
+
+Write-Centered "Cache limpo" Green
+Pause
+
+}
+
+# -------- MENU LIMPEZA --------
+
+function Menu-Limpeza {
+
+Clear-Host
+Linha
+Write-Centered "LIMPEZA DO SISTEMA" Cyan
+Linha
+
+Write-Centered "1 - Limpar TEMP Windows"
+Write-Centered "2 - Limpar TEMP Usuario"
+Write-Centered "3 - Limpeza de Disco"
+Write-Centered "4 - Limpar Cache Windows Update"
+Write-Centered "0 - Voltar"
+
+$op = Read-Host "Escolha"
+
+switch ($op) {
+
+1 { Limpar-Temp }
+2 { Limpar-TempUsuario }
+3 { Limpeza-Disco }
+4 { Limpar-WindowsUpdate }
+
+}
+
+Menu-Principal
+
+}
+
 # -------- INSTALAR APPS --------
 
 function Instalar-Apps {
@@ -157,18 +228,16 @@ $url = "COLOQUE_AQUI_LINK_BITDEFENDER"
 $dest = "$env:TEMP\bitdefender.exe"
 
 Write-Centered "Baixando Bitdefender..." Yellow
-
 Invoke-WebRequest $url -OutFile $dest
 
 Write-Centered "Instalando Bitdefender..." Yellow
-
 Start-Process $dest -ArgumentList "/silent" -Wait
 
 Pause
 
 }
 
-# -------- MENU NAVEGADORES --------
+# -------- MENUS --------
 
 function Menu-Navegadores {
 
@@ -178,20 +247,17 @@ Write-Centered "NAVEGADORES" Cyan
 Linha
 
 Write-Centered "1 - Google Chrome"
-Write-Centered "0 - Voltar" Gray
+Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
 switch ($op) {
 
 1 {
-
 $apps = @(
 @{nome="Google Chrome"; id="Google.Chrome"}
 )
-
 Instalar-Apps $apps
-
 }
 
 }
@@ -199,8 +265,6 @@ Instalar-Apps $apps
 Menu-Principal
 
 }
-
-# -------- MENU FERRAMENTAS --------
 
 function Menu-Ferramentas {
 
@@ -211,30 +275,24 @@ Linha
 
 Write-Centered "1 - 7zip"
 Write-Centered "2 - VLC"
-Write-Centered "0 - Voltar" Gray
+Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
 switch ($op) {
 
 1 {
-
 $apps = @(
 @{nome="7zip"; id="7zip.7zip"}
 )
-
 Instalar-Apps $apps
-
 }
 
 2 {
-
 $apps = @(
 @{nome="VLC"; id="VideoLAN.VLC"}
 )
-
 Instalar-Apps $apps
-
 }
 
 }
@@ -242,8 +300,6 @@ Instalar-Apps $apps
 Menu-Principal
 
 }
-
-# -------- MENU SUPORTE --------
 
 function Menu-Suporte {
 
@@ -253,20 +309,17 @@ Write-Centered "SUPORTE TI" Cyan
 Linha
 
 Write-Centered "1 - AnyDesk"
-Write-Centered "0 - Voltar" Gray
+Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
 switch ($op) {
 
 1 {
-
 $apps = @(
 @{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
 )
-
 Instalar-Apps $apps
-
 }
 
 }
@@ -274,8 +327,6 @@ Instalar-Apps $apps
 Menu-Principal
 
 }
-
-# -------- MENU SEGURANCA --------
 
 function Menu-Seguranca {
 
@@ -285,27 +336,13 @@ Write-Centered "SEGURANCA" Cyan
 Linha
 
 Write-Centered "1 - Bitdefender"
-Write-Centered "2 - Microsoft Office"
-Write-Centered "0 - Voltar" Gray
+Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
 switch ($op) {
 
 1 { Instalar-Bitdefender }
-
-2 {
-
-Write-Centered "Instalando Microsoft Office..." Yellow
-
-winget install -e --id Microsoft.OfficeDeploymentTool `
---accept-package-agreements `
---accept-source-agreements `
---silent
-
-Pause
-
-}
 
 }
 
@@ -331,13 +368,6 @@ $apps = @(
 
 Instalar-Apps $apps
 
-Write-Centered "Instalando Microsoft Office..." Yellow
-
-winget install -e --id Microsoft.OfficeDeploymentTool `
---accept-package-agreements `
---accept-source-agreements `
---silent
-
 Instalar-Bitdefender
 
 Write-Centered "INSTALACAO FINALIZADA" Green
@@ -352,7 +382,6 @@ Menu-Principal
 function Menu-Principal {
 
 Clear-Host
-
 Logo
 
 Write-Centered "1 - Navegadores"
@@ -360,6 +389,7 @@ Write-Centered "2 - Ferramentas"
 Write-Centered "3 - Suporte TI"
 Write-Centered "4 - Seguranca"
 Write-Centered "5 - Instalar tudo" Green
+Write-Centered "6 - Limpeza do Sistema" Yellow
 Write-Centered "0 - Sair" Red
 
 $op = Read-Host "Escolha"
@@ -371,12 +401,11 @@ switch ($op) {
 3 { Menu-Suporte }
 4 { Menu-Seguranca }
 5 { Instalar-Tudo }
+6 { Menu-Limpeza }
 
 0 {
-
 Stop-Transcript
 Exit
-
 }
 
 }
