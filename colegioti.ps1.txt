@@ -31,18 +31,30 @@ function Sistema-Login {
 
 Clear-Host
 
+$largura = 60
+$linha = "═" * $largura
+
+function Center($txt){
+$espaco = ($largura - $txt.Length) / 2
+return (" " * [int]$espaco) + $txt
+}
+
 Write-Host ""
-Write-Host "======================================="
-Write-Host "        SISTEMA CORPORATIVO TI"
-Write-Host "         COLEGIO CRUZEIRO"
-Write-Host "======================================="
+Write-Host "╔$linha╗" -ForegroundColor DarkGreen
+Write-Host "║$(Center "SISTEMA CORPORATIVO TI")║" -ForegroundColor Green
+Write-Host "║$(Center "COLEGIO CRUZEIRO")║" -ForegroundColor Green
+Write-Host "║$(Center "Painel de Autenticacao")║" -ForegroundColor Cyan
+Write-Host "╚$linha╝" -ForegroundColor DarkGreen
 Write-Host ""
 
 $usuarioCorreto = "infra-ti"
 $senhaCorreta = "infra@2026"
 
+Write-Host "╔════════ LOGIN ════════╗" -ForegroundColor DarkGreen
+
 $usuario = Read-Host "Usuario"
 $senha = Read-Host "Senha" -AsSecureString
+
 $senhaTexto = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 [Runtime.InteropServices.Marshal]::SecureStringToBSTR($senha)
 )
@@ -50,14 +62,14 @@ $senhaTexto = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
 if ($usuario -eq $usuarioCorreto -and $senhaTexto -eq $senhaCorreta) {
 
 Write-Host ""
-Write-Host "Login realizado com sucesso!" -ForegroundColor Green
+Write-Host "✔ ACESSO AUTORIZADO" -ForegroundColor Green
 Start-Sleep 2
 
 }
 else {
 
 Write-Host ""
-Write-Host "Usuario ou senha incorretos!" -ForegroundColor Red
+Write-Host "✖ Usuario ou senha incorretos!" -ForegroundColor Red
 Pause
 Sistema-Login
 
