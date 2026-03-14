@@ -2,79 +2,28 @@
 # INSTALADOR CORPORATIVO - COLEGIO CRUZEIRO
 # ======================================================
 
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
 # -------- VERIFICAR ADMIN --------
 
 if (!([Security.Principal.WindowsPrincipal] `
 [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
 [Security.Principal.WindowsBuiltInRole] "Administrator"))
 {
-Write-Host "Execute o script como Administrador!" -ForegroundColor Red
+Write-Host "Execute o PowerShell como Administrador!" -ForegroundColor Red
 Pause
 Exit
 }
-
-# -------- FONTE 28 + TELA MAXIMIZADA --------
-
-Add-Type -TypeDefinition @"
-using System;
-using System.Runtime.InteropServices;
-
-public class ConsoleHelper
-{
-    [StructLayout(LayoutKind.Sequential)]
-    public struct COORD
-    {
-        public short X;
-        public short Y;
-    }
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct CONSOLE_FONT_INFO_EX
-    {
-        public int cbSize;
-        public int nFont;
-        public COORD dwFontSize;
-        public int FontFamily;
-        public int FontWeight;
-
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-        public string FaceName;
-    }
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    public static extern bool SetCurrentConsoleFontEx(
-        IntPtr consoleOutput,
-        bool maximumWindow,
-        ref CONSOLE_FONT_INFO_EX consoleCurrentFontEx
-    );
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    public static extern IntPtr GetStdHandle(int dwType);
-}
-"@
-
-$handle = [ConsoleHelper]::GetStdHandle(-11)
-
-$font = New-Object ConsoleHelper+CONSOLE_FONT_INFO_EX
-$font.cbSize = [Runtime.InteropServices.Marshal]::SizeOf($font)
-$font.FaceName = "Consolas"
-$font.dwFontSize.X = 0
-$font.dwFontSize.Y = 28
-
-[ConsoleHelper]::SetCurrentConsoleFontEx($handle,$false,[ref]$font)
-
-Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.SendKeys]::SendWait("%{ENTER}")
-
-# -------- LOG --------
-
-Start-Transcript "$env:TEMP\deploy_apps_czr.log"
 
 # -------- VISUAL --------
 
 $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.UI.RawUI.ForegroundColor = "Green"
 Clear-Host
+
+# -------- LOG --------
+
+Start-Transcript "$env:TEMP\deploy_apps_czr.log"
 
 # -------- CENTRALIZAR TEXTO --------
 
@@ -109,98 +58,61 @@ Write-Centered " ██║     ██║   ██║██║     ██╔═�
 Write-Centered " ╚██████╗╚██████╔╝███████╗███████╗╚██████╔╝██║╚██████╔╝" Cyan
 Write-Centered "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝ ╚═════╝ ╚═╝ ╚═════╝ " Cyan
 Write-Centered ""
-Write-Centered "            COLEGIO CRUZEIRO TI            " White
-Write-Centered "════════════════════════════════════════════════════" Yellow
+Write-Centered "COLEGIO CRUZEIRO TI" White
+Linha
 
 }
 
-# -------- VERIFICAR APP --------
+# -------- INSTALAR APPS --------
 
-function App-Instalado {
-
-param($id)
-
-$result = winget list --id $id -e 2>$null | Out-String
-
-if ($result -match $id) {
-return $true
-}
-else {
-return $false
-}
-
-}
-
-# -------- INSTALAR APPS PARALELO --------
-
-function Instalar-Apps-Paralelo {
+function Instalar-Apps {
 
 param($apps)
 
-$jobs = @()
-
 foreach ($app in $apps) {
 
-$jobs += Start-Job -ScriptBlock {
+Write-Centered "Instalando $($app.nome)..." Cyan
 
-param($nome,$id)
+$result = winget list --id $($app.id) -e 2>$null | Out-String
 
-$result = winget list --id $id -e 2>$null | Out-String
+if ($result -notmatch $app.id) {
 
-if ($result -notmatch $id) {
-
-winget install -e --id $id `
+winget install -e --id $($app.id) `
 --accept-package-agreements `
 --accept-source-agreements `
 --silent
 
-}
-
-} -ArgumentList $app.nome,$app.id
-
-}
-
-Write-Centered "Instalando aplicativos..." Cyan
-
-while ($jobs.State -contains "Running") {
-
-$done = ($jobs | Where-Object State -eq "Completed").Count
-$total = $jobs.Count
-
-$percent = ($done / $total) * 100
-
-Write-Progress `
--Activity "Instalação em andamento" `
--Status "$done de $total concluídos" `
--PercentComplete $percent
-
-Start-Sleep 1
-
-}
-
-Receive-Job $jobs | Out-Null
-Remove-Job $jobs
-
-}
-
-# -------- INSTALAR BITDEFENDER --------
-
-function Instalar-Bitdefender {
-
-$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
-$bd = "$scriptPath\bitdefender.exe"
-
-if (Test-Path $bd) {
-
-Write-Centered "Instalando Bitdefender..." Yellow
-Start-Process $bd -ArgumentList "/silent" -Wait
+Write-Centered "$($app.nome) instalado" Green
 
 }
 else {
 
-Write-Centered "Instalador do Bitdefender não encontrado." Red
+Write-Centered "$($app.nome) ja instalado" Yellow
 
 }
+
+}
+
+Pause
+
+}
+
+# -------- BITDEFENDER --------
+
+function Instalar-Bitdefender {
+
+$url = "COLOQUE_AQUI_LINK_BITDEFENDER"
+$dest = "$env:TEMP\bitdefender.exe"
+
+Write-Centered "Baixando Bitdefender..." Yellow
+
+Invoke-WebRequest $url -OutFile $dest
+
+Write-Centered "Instalando Bitdefender..." Yellow
+
+Start-Process $dest -ArgumentList "/silent" -Wait
+
+Pause
 
 }
 
@@ -226,16 +138,13 @@ $apps = @(
 @{nome="Google Chrome"; id="Google.Chrome"}
 )
 
-Instalar-Apps-Paralelo $apps
+Instalar-Apps $apps
 
 }
 
-0 { Menu-Principal }
-
 }
 
-Pause
-Menu-Navegadores
+Menu-Principal
 
 }
 
@@ -262,7 +171,7 @@ $apps = @(
 @{nome="7zip"; id="7zip.7zip"}
 )
 
-Instalar-Apps-Paralelo $apps
+Instalar-Apps $apps
 
 }
 
@@ -272,16 +181,13 @@ $apps = @(
 @{nome="VLC"; id="VideoLAN.VLC"}
 )
 
-Instalar-Apps-Paralelo $apps
+Instalar-Apps $apps
 
 }
 
-0 { Menu-Principal }
-
 }
 
-Pause
-Menu-Ferramentas
+Menu-Principal
 
 }
 
@@ -307,20 +213,17 @@ $apps = @(
 @{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
 )
 
-Instalar-Apps-Paralelo $apps
+Instalar-Apps $apps
 
 }
 
-0 { Menu-Principal }
+}
+
+Menu-Principal
 
 }
 
-Pause
-Menu-Suporte
-
-}
-
-# -------- MENU SEGURANÇA --------
+# -------- MENU SEGURANCA --------
 
 function Menu-Seguranca {
 
@@ -348,14 +251,13 @@ winget install -e --id Microsoft.OfficeDeploymentTool `
 --accept-source-agreements `
 --silent
 
-}
-
-0 { Menu-Principal }
-
-}
-
 Pause
-Menu-Seguranca
+
+}
+
+}
+
+Menu-Principal
 
 }
 
@@ -375,7 +277,7 @@ $apps = @(
 @{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
 )
 
-Instalar-Apps-Paralelo $apps
+Instalar-Apps $apps
 
 Write-Centered "Instalando Microsoft Office..." Yellow
 
@@ -400,12 +302,11 @@ function Menu-Principal {
 Clear-Host
 
 Logo
-Linha
 
 Write-Centered "1 - Navegadores"
 Write-Centered "2 - Ferramentas"
 Write-Centered "3 - Suporte TI"
-Write-Centered "4 - Segurança"
+Write-Centered "4 - Seguranca"
 Write-Centered "5 - Instalar tudo" Green
 Write-Centered "0 - Sair" Red
 
