@@ -1,3 +1,4 @@
+```powershell
 # ======================================================
 # INSTALADOR CORPORATIVO - COLEGIO CRUZEIRO
 # ======================================================
@@ -40,9 +41,7 @@ Write-Host (" " * [int]($sideSpace + $padding) + $text) -ForegroundColor $color
 }
 
 function Linha {
-
 Write-Centered "════════════════════════════════════════════════════" Yellow
-
 }
 
 # -------- LOGO --------
@@ -61,7 +60,7 @@ Linha
 
 }
 
-# -------- LOGIN --------
+# -------- LOGIN MODERNO --------
 
 function Sistema-Login {
 
@@ -72,19 +71,44 @@ while ($true){
 
 Clear-Host
 
-$usuario = Read-Host "Usuario"
-$senha = Read-Host "Senha"
+$largura = 50
+$linha = "═" * $largura
 
-if ($usuario -eq $usuarioCorreto -and $senha -eq $senhaCorreta){
+function Center($txt){
+$espaco = ($largura - $txt.Length) / 2
+return (" " * [int]$espaco) + $txt
+}
 
-Write-Centered "ACESSO AUTORIZADO" Green
+Write-Host ""
+Write-Host "╔$linha╗" -ForegroundColor DarkGreen
+Write-Host "║$(Center "SISTEMA CORPORATIVO TI")║" -ForegroundColor Green
+Write-Host "║$(Center "COLEGIO CRUZEIRO")║" -ForegroundColor Green
+Write-Host "║$(Center "PAINEL DE AUTENTICACAO")║" -ForegroundColor Cyan
+Write-Host "╠$linha╣" -ForegroundColor DarkGreen
+Write-Host "║$(Center "ACESSO RESTRITO")║" -ForegroundColor Yellow
+Write-Host "╚$linha╝" -ForegroundColor DarkGreen
+Write-Host ""
+
+Write-Host "╔══════════════════════════════════╗" -ForegroundColor DarkGreen
+$usuario = Read-Host "║ Usuario"
+$senha = Read-Host "║ Senha" -AsSecureString
+Write-Host "╚══════════════════════════════════╝" -ForegroundColor DarkGreen
+
+$senhaTexto = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+[Runtime.InteropServices.Marshal]::SecureStringToBSTR($senha)
+)
+
+if ($usuario -eq $usuarioCorreto -and $senhaTexto -eq $senhaCorreta){
+
+Write-Host ""
+Write-Centered "✔ ACESSO AUTORIZADO" Green
 Start-Sleep 2
 break
 
 }else{
 
-Write-Centered "Usuario ou senha incorretos" Red
-Pause
+Write-Centered "✖ Usuario ou senha incorretos!" Red
+Start-Sleep 2
 
 }
 
@@ -329,6 +353,7 @@ switch ($op){
 2 { Limpar-TempUsuario }
 3 { Limpeza-Disco }
 4 { Limpar-WindowsUpdate }
+
 0 { return }
 
 }
@@ -380,10 +405,8 @@ switch ($op){
 6 { Menu-Limpeza }
 
 0 {
-
 Stop-Transcript
 Exit
-
 }
 
 }
@@ -396,3 +419,4 @@ Exit
 
 Sistema-Login
 Menu-Principal
+```
