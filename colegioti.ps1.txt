@@ -21,61 +21,7 @@ $Host.UI.RawUI.BackgroundColor = "Black"
 $Host.UI.RawUI.ForegroundColor = "Green"
 Clear-Host
 
-# -------- LOG --------
-
 Start-Transcript "$env:TEMP\deploy_apps_czr.log"
-
-# -------- LOGIN --------
-
-function Sistema-Login {
-
-Clear-Host
-
-$largura = 60
-$linha = "═" * $largura
-
-function Center($txt){
-$espaco = ($largura - $txt.Length) / 2
-return (" " * [int]$espaco) + $txt
-}
-
-Write-Host ""
-Write-Host "╔$linha╗" -ForegroundColor DarkGreen
-Write-Host "║$(Center "SISTEMA CORPORATIVO TI")║" -ForegroundColor Green
-Write-Host "║$(Center "COLEGIO CRUZEIRO")║" -ForegroundColor Green
-Write-Host "║$(Center "Painel de Autenticacao")║" -ForegroundColor Cyan
-Write-Host "╚$linha╝" -ForegroundColor DarkGreen
-Write-Host ""
-
-$usuarioCorreto = "infra-ti"
-$senhaCorreta = "infra@2026"
-
-Write-Host "╔════════ LOGIN ════════╗" -ForegroundColor DarkGreen
-
-$usuario = Read-Host "Usuario"
-$senha = Read-Host "Senha" -AsSecureString
-
-$senhaTexto = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
-[Runtime.InteropServices.Marshal]::SecureStringToBSTR($senha)
-)
-
-if ($usuario -eq $usuarioCorreto -and $senhaTexto -eq $senhaCorreta) {
-
-Write-Host ""
-Write-Host "✔ ACESSO AUTORIZADO" -ForegroundColor Green
-Start-Sleep 2
-
-}
-else {
-
-Write-Host ""
-Write-Host "✖ Usuario ou senha incorretos!" -ForegroundColor Red
-Pause
-Sistema-Login
-
-}
-
-}
 
 # -------- CENTRALIZAR TEXTO --------
 
@@ -115,29 +61,59 @@ Linha
 
 }
 
-# -------- LIMPEZA DO SISTEMA --------
+# -------- LOGIN --------
+
+function Sistema-Login {
+
+$usuarioCorreto = "infra-ti"
+$senhaCorreta = "infra@2026"
+
+while ($true){
+
+Clear-Host
+
+$usuario = Read-Host "Usuario"
+$senha = Read-Host "Senha"
+
+if ($usuario -eq $usuarioCorreto -and $senha -eq $senhaCorreta){
+
+Write-Centered "ACESSO AUTORIZADO" Green
+Start-Sleep 2
+break
+
+}else{
+
+Write-Centered "Usuario ou senha incorretos" Red
+Pause
+
+}
+
+}
+
+}
+
+# -------- LIMPEZA --------
 
 function Limpar-Temp {
 
-Write-Centered "Limpando TEMP do Windows..." Yellow
+Write-Centered "Limpando TEMP Windows..." Yellow
 Remove-Item "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
-Write-Centered "Limpeza concluida" Green
+Write-Centered "Concluido" Green
 Pause
 
 }
 
 function Limpar-TempUsuario {
 
-Write-Centered "Limpando TEMP do usuario..." Yellow
+Write-Centered "Limpando TEMP Usuario..." Yellow
 Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
-Write-Centered "Limpeza concluida" Green
+Write-Centered "Concluido" Green
 Pause
 
 }
 
 function Limpeza-Disco {
 
-Write-Centered "Abrindo Limpeza de Disco..." Yellow
 Start-Process cleanmgr
 Pause
 
@@ -145,44 +121,12 @@ Pause
 
 function Limpar-WindowsUpdate {
 
-Write-Centered "Limpando cache do Windows Update..." Yellow
-
 Stop-Service wuauserv -Force
 Remove-Item "C:\Windows\SoftwareDistribution\Download\*" -Recurse -Force -ErrorAction SilentlyContinue
 Start-Service wuauserv
 
-Write-Centered "Cache limpo" Green
+Write-Centered "Cache Windows Update limpo" Green
 Pause
-
-}
-
-# -------- MENU LIMPEZA --------
-
-function Menu-Limpeza {
-
-Clear-Host
-Linha
-Write-Centered "LIMPEZA DO SISTEMA" Cyan
-Linha
-
-Write-Centered "1 - Limpar TEMP Windows"
-Write-Centered "2 - Limpar TEMP Usuario"
-Write-Centered "3 - Limpeza de Disco"
-Write-Centered "4 - Limpar Cache Windows Update"
-Write-Centered "0 - Voltar"
-
-$op = Read-Host "Escolha"
-
-switch ($op) {
-
-1 { Limpar-Temp }
-2 { Limpar-TempUsuario }
-3 { Limpeza-Disco }
-4 { Limpar-WindowsUpdate }
-
-}
-
-Menu-Principal
 
 }
 
@@ -192,27 +136,14 @@ function Instalar-Apps {
 
 param($apps)
 
-foreach ($app in $apps) {
+foreach ($app in $apps){
 
 Write-Centered "Instalando $($app.nome)..." Cyan
-
-$result = winget list --id $($app.id) -e 2>$null | Out-String
-
-if ($result -notmatch $app.id) {
 
 winget install -e --id $($app.id) `
 --accept-package-agreements `
 --accept-source-agreements `
 --silent
-
-Write-Centered "$($app.nome) instalado" Green
-
-}
-else {
-
-Write-Centered "$($app.nome) ja instalado" Yellow
-
-}
 
 }
 
@@ -227,10 +158,7 @@ function Instalar-Bitdefender {
 $url = "COLOQUE_AQUI_LINK_BITDEFENDER"
 $dest = "$env:TEMP\bitdefender.exe"
 
-Write-Centered "Baixando Bitdefender..." Yellow
 Invoke-WebRequest $url -OutFile $dest
-
-Write-Centered "Instalando Bitdefender..." Yellow
 Start-Process $dest -ArgumentList "/silent" -Wait
 
 Pause
@@ -240,6 +168,8 @@ Pause
 # -------- MENUS --------
 
 function Menu-Navegadores {
+
+while ($true){
 
 Clear-Host
 Linha
@@ -251,22 +181,29 @@ Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
-switch ($op) {
+switch ($op){
 
 1 {
+
 $apps = @(
 @{nome="Google Chrome"; id="Google.Chrome"}
 )
+
 Instalar-Apps $apps
-}
 
 }
 
-Menu-Principal
+0 { return }
+
+}
+
+}
 
 }
 
 function Menu-Ferramentas {
+
+while ($true){
 
 Clear-Host
 Linha
@@ -279,29 +216,39 @@ Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
-switch ($op) {
+switch ($op){
 
 1 {
+
 $apps = @(
 @{nome="7zip"; id="7zip.7zip"}
 )
+
 Instalar-Apps $apps
+
 }
 
 2 {
+
 $apps = @(
 @{nome="VLC"; id="VideoLAN.VLC"}
 )
+
 Instalar-Apps $apps
-}
 
 }
 
-Menu-Principal
+0 { return }
+
+}
+
+}
 
 }
 
 function Menu-Suporte {
+
+while ($true){
 
 Clear-Host
 Linha
@@ -313,22 +260,29 @@ Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
-switch ($op) {
+switch ($op){
 
 1 {
+
 $apps = @(
 @{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
 )
+
 Instalar-Apps $apps
-}
 
 }
 
-Menu-Principal
+0 { return }
+
+}
+
+}
 
 }
 
 function Menu-Seguranca {
+
+while ($true){
 
 Clear-Host
 Linha
@@ -340,24 +294,50 @@ Write-Centered "0 - Voltar"
 
 $op = Read-Host "Escolha"
 
-switch ($op) {
+switch ($op){
 
 1 { Instalar-Bitdefender }
 
-}
-
-Menu-Principal
+0 { return }
 
 }
 
-# -------- INSTALAR TUDO --------
+}
 
-function Instalar-Tudo {
+}
+
+function Menu-Limpeza {
+
+while ($true){
 
 Clear-Host
 Linha
-Write-Centered "INSTALACAO COMPLETA" Green
+Write-Centered "LIMPEZA DO SISTEMA" Cyan
 Linha
+
+Write-Centered "1 - Limpar TEMP Windows"
+Write-Centered "2 - Limpar TEMP Usuario"
+Write-Centered "3 - Limpeza de Disco"
+Write-Centered "4 - Limpar Cache Windows Update"
+Write-Centered "0 - Voltar"
+
+$op = Read-Host "Escolha"
+
+switch ($op){
+
+1 { Limpar-Temp }
+2 { Limpar-TempUsuario }
+3 { Limpeza-Disco }
+4 { Limpar-WindowsUpdate }
+0 { return }
+
+}
+
+}
+
+}
+
+function Instalar-Tudo {
 
 $apps = @(
 @{nome="Google Chrome"; id="Google.Chrome"}
@@ -367,19 +347,15 @@ $apps = @(
 )
 
 Instalar-Apps $apps
-
 Instalar-Bitdefender
-
-Write-Centered "INSTALACAO FINALIZADA" Green
-
-Pause
-Menu-Principal
 
 }
 
 # -------- MENU PRINCIPAL --------
 
 function Menu-Principal {
+
+while ($true){
 
 Clear-Host
 Logo
@@ -394,7 +370,7 @@ Write-Centered "0 - Sair" Red
 
 $op = Read-Host "Escolha"
 
-switch ($op) {
+switch ($op){
 
 1 { Menu-Navegadores }
 2 { Menu-Ferramentas }
@@ -404,8 +380,12 @@ switch ($op) {
 6 { Menu-Limpeza }
 
 0 {
+
 Stop-Transcript
 Exit
+
+}
+
 }
 
 }
