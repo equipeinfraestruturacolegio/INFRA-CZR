@@ -45,13 +45,14 @@ Write-Centered "===================================================" Yellow
 
 function Logo {
 
-Write-Centered "  ____                 _ _           " Cyan
-Write-Centered " / ___| ___   ___   __| (_) ___      " Cyan
-Write-Centered "| |    / _ \ / _ \ / _` | |/ _ \     " Cyan
-Write-Centered "| |___| (_) | (_) | (_| | | (_) |    " Cyan
-Write-Centered " \____|\___/ \___/ \__,_|_|\___/     " Cyan
-Write-Centered "                                     " Cyan
-Write-Centered "        COLEGIO CRUZEIRO TI          " White
+Write-Centered "   _____  ____  _      ______ _____ _____ ____   " Cyan
+Write-Centered "  / ____|/ __ \| |    |  ____/ ____|_   _/ __ \  " Cyan
+Write-Centered " | |    | |  | | |    | |__ | |  __  | || |  | | " Cyan
+Write-Centered " | |    | |  | | |    |  __|| | |_ | | || |  | | " Cyan
+Write-Centered " | |____| |__| | |____| |___| |__| |_| || |__| | " Cyan
+Write-Centered "  \_____|\____/|______|______\_____|_____\____/ " Cyan
+Write-Centered ""
+Write-Centered "          COLEGIO CRUZEIRO TI          " White
 
 }
 
