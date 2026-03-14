@@ -1,0 +1,377 @@
+# ======================================================
+# INSTALADOR CORPORATIVO - COLEGIO CRUZEIRO
+# ======================================================
+
+Set-ExecutionPolicy Bypass -Scope Process -Force
+
+# -------- VERIFICAR ADMIN --------
+
+if (!([Security.Principal.WindowsPrincipal] `
+[Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+[Security.Principal.WindowsBuiltInRole] "Administrator"))
+{
+Write-Host "Execute o PowerShell como Administrador!" -ForegroundColor Red
+Pause
+Exit
+}
+
+# -------- VISUAL --------
+
+$Host.UI.RawUI.BackgroundColor = "Black"
+$Host.UI.RawUI.ForegroundColor = "Green"
+Clear-Host
+
+# -------- LOG --------
+
+Start-Transcript "$env:TEMP\deploy_apps_czr.log"
+
+# -------- LOGIN --------
+
+function Sistema-Login {
+
+Clear-Host
+
+Write-Host ""
+Write-Host "======================================="
+Write-Host "        SISTEMA CORPORATIVO TI"
+Write-Host "         COLEGIO CRUZEIRO"
+Write-Host "======================================="
+Write-Host ""
+
+$usuarioCorreto = "infra-ti"
+$senhaCorreta = "infra@2026"
+
+$usuario = Read-Host "Usuario"
+$senha = Read-Host "Senha" -AsSecureString
+$senhaTexto = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
+[Runtime.InteropServices.Marshal]::SecureStringToBSTR($senha)
+)
+
+if ($usuario -eq $usuarioCorreto -and $senhaTexto -eq $senhaCorreta) {
+
+Write-Host ""
+Write-Host "Login realizado com sucesso!" -ForegroundColor Green
+Start-Sleep 2
+
+}
+else {
+
+Write-Host ""
+Write-Host "Usuario ou senha incorretos!" -ForegroundColor Red
+Pause
+Sistema-Login
+
+}
+
+}
+
+# -------- CENTRALIZAR TEXTO --------
+
+function Write-Centered {
+
+param($text,$color="White")
+
+$consoleWidth = 90
+$windowWidth = $Host.UI.RawUI.WindowSize.Width
+
+$padding = [math]::Max(0,($consoleWidth-$text.Length)/2)
+$sideSpace = [math]::Max(0,($windowWidth-$consoleWidth)/2)
+
+Write-Host (" " * [int]($sideSpace + $padding) + $text) -ForegroundColor $color
+
+}
+
+function Linha {
+
+Write-Centered "════════════════════════════════════════════════════" Yellow
+
+}
+
+# -------- LOGO --------
+
+function Logo {
+
+Write-Centered "  ██████╗ ██████╗ ██╗     ███████╗ ██████╗ ██╗ ██████╗ " Cyan
+Write-Centered " ██╔════╝██╔═══██╗██║     ██╔════╝██╔════╝ ██║██╔═══██╗" Cyan
+Write-Centered " ██║     ██║   ██║██║     █████╗  ██║  ███╗██║██║   ██║" Cyan
+Write-Centered " ██║     ██║   ██║██║     ██╔══╝  ██║   ██║██║██║   ██║" Cyan
+Write-Centered " ╚██████╗╚██████╔╝███████╗███████╗╚██████╔╝██║╚██████╔╝" Cyan
+Write-Centered "  ╚═════╝ ╚═════╝ ╚══════╝╚══════╝ ╚═════╝ ╚═╝ ╚═════╝ " Cyan
+Write-Centered ""
+Write-Centered "COLEGIO CRUZEIRO TI" White
+Linha
+
+}
+
+# -------- INSTALAR APPS --------
+
+function Instalar-Apps {
+
+param($apps)
+
+foreach ($app in $apps) {
+
+Write-Centered "Instalando $($app.nome)..." Cyan
+
+$result = winget list --id $($app.id) -e 2>$null | Out-String
+
+if ($result -notmatch $app.id) {
+
+winget install -e --id $($app.id) `
+--accept-package-agreements `
+--accept-source-agreements `
+--silent
+
+Write-Centered "$($app.nome) instalado" Green
+
+}
+else {
+
+Write-Centered "$($app.nome) ja instalado" Yellow
+
+}
+
+}
+
+Pause
+
+}
+
+# -------- BITDEFENDER --------
+
+function Instalar-Bitdefender {
+
+$url = "COLOQUE_AQUI_LINK_BITDEFENDER"
+$dest = "$env:TEMP\bitdefender.exe"
+
+Write-Centered "Baixando Bitdefender..." Yellow
+
+Invoke-WebRequest $url -OutFile $dest
+
+Write-Centered "Instalando Bitdefender..." Yellow
+
+Start-Process $dest -ArgumentList "/silent" -Wait
+
+Pause
+
+}
+
+# -------- MENU NAVEGADORES --------
+
+function Menu-Navegadores {
+
+Clear-Host
+Linha
+Write-Centered "NAVEGADORES" Cyan
+Linha
+
+Write-Centered "1 - Google Chrome"
+Write-Centered "0 - Voltar" Gray
+
+$op = Read-Host "Escolha"
+
+switch ($op) {
+
+1 {
+
+$apps = @(
+@{nome="Google Chrome"; id="Google.Chrome"}
+)
+
+Instalar-Apps $apps
+
+}
+
+}
+
+Menu-Principal
+
+}
+
+# -------- MENU FERRAMENTAS --------
+
+function Menu-Ferramentas {
+
+Clear-Host
+Linha
+Write-Centered "FERRAMENTAS" Cyan
+Linha
+
+Write-Centered "1 - 7zip"
+Write-Centered "2 - VLC"
+Write-Centered "0 - Voltar" Gray
+
+$op = Read-Host "Escolha"
+
+switch ($op) {
+
+1 {
+
+$apps = @(
+@{nome="7zip"; id="7zip.7zip"}
+)
+
+Instalar-Apps $apps
+
+}
+
+2 {
+
+$apps = @(
+@{nome="VLC"; id="VideoLAN.VLC"}
+)
+
+Instalar-Apps $apps
+
+}
+
+}
+
+Menu-Principal
+
+}
+
+# -------- MENU SUPORTE --------
+
+function Menu-Suporte {
+
+Clear-Host
+Linha
+Write-Centered "SUPORTE TI" Cyan
+Linha
+
+Write-Centered "1 - AnyDesk"
+Write-Centered "0 - Voltar" Gray
+
+$op = Read-Host "Escolha"
+
+switch ($op) {
+
+1 {
+
+$apps = @(
+@{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
+)
+
+Instalar-Apps $apps
+
+}
+
+}
+
+Menu-Principal
+
+}
+
+# -------- MENU SEGURANCA --------
+
+function Menu-Seguranca {
+
+Clear-Host
+Linha
+Write-Centered "SEGURANCA" Cyan
+Linha
+
+Write-Centered "1 - Bitdefender"
+Write-Centered "2 - Microsoft Office"
+Write-Centered "0 - Voltar" Gray
+
+$op = Read-Host "Escolha"
+
+switch ($op) {
+
+1 { Instalar-Bitdefender }
+
+2 {
+
+Write-Centered "Instalando Microsoft Office..." Yellow
+
+winget install -e --id Microsoft.OfficeDeploymentTool `
+--accept-package-agreements `
+--accept-source-agreements `
+--silent
+
+Pause
+
+}
+
+}
+
+Menu-Principal
+
+}
+
+# -------- INSTALAR TUDO --------
+
+function Instalar-Tudo {
+
+Clear-Host
+Linha
+Write-Centered "INSTALACAO COMPLETA" Green
+Linha
+
+$apps = @(
+@{nome="Google Chrome"; id="Google.Chrome"}
+@{nome="7zip"; id="7zip.7zip"}
+@{nome="VLC"; id="VideoLAN.VLC"}
+@{nome="AnyDesk"; id="AnyDeskSoftwareGmbH.AnyDesk"}
+)
+
+Instalar-Apps $apps
+
+Write-Centered "Instalando Microsoft Office..." Yellow
+
+winget install -e --id Microsoft.OfficeDeploymentTool `
+--accept-package-agreements `
+--accept-source-agreements `
+--silent
+
+Instalar-Bitdefender
+
+Write-Centered "INSTALACAO FINALIZADA" Green
+
+Pause
+Menu-Principal
+
+}
+
+# -------- MENU PRINCIPAL --------
+
+function Menu-Principal {
+
+Clear-Host
+
+Logo
+
+Write-Centered "1 - Navegadores"
+Write-Centered "2 - Ferramentas"
+Write-Centered "3 - Suporte TI"
+Write-Centered "4 - Seguranca"
+Write-Centered "5 - Instalar tudo" Green
+Write-Centered "0 - Sair" Red
+
+$op = Read-Host "Escolha"
+
+switch ($op) {
+
+1 { Menu-Navegadores }
+2 { Menu-Ferramentas }
+3 { Menu-Suporte }
+4 { Menu-Seguranca }
+5 { Instalar-Tudo }
+
+0 {
+
+Stop-Transcript
+Exit
+
+}
+
+}
+
+}
+
+# -------- INICIAR --------
+
+Sistema-Login
+Menu-Principal
